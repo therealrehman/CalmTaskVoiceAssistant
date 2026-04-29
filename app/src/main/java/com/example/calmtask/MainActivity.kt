@@ -2,8 +2,6 @@ package com.example.calmtask
 
 import android.Manifest
 import android.content.Context
-import android.content.SharedPreferences
-import android.content.pm.PackageManager
 import android.os.Bundle
 import android.speech.tts.TextToSpeech
 import androidx.activity.ComponentActivity
@@ -31,16 +29,15 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -104,7 +101,7 @@ class MainActivity : ComponentActivity() {
 
         textToSpeech?.language = locale
         textToSpeech?.setSpeechRate(0.92f)
-        textToSpeech?.speak(text, TextToSpeech.QUEUE_FLUSH, null, "calmtask_voice")
+        textToSpeech?.speak(text, TextToSpeech.QUEUE_FLUSH, null, "calmtaskvoice")
     }
 
     override fun onDestroy() {
@@ -120,7 +117,7 @@ fun CalmTaskApp(
 ) {
     val context = LocalContext.current
     val prefs = remember {
-        context.getSharedPreferences("calmtask_prefs", Context.MODE_PRIVATE)
+        context.getSharedPreferences("calmtaskprefs", Context.MODE_PRIVATE)
     }
 
     var screen by remember {
@@ -195,10 +192,8 @@ fun CalmTaskApp(
 
                 Screen.HOME -> HomeScreen(
                     name = name,
-                    language = language,
                     mood = mood,
                     tasks = tasks,
-                    voiceEnabled = voiceEnabled,
                     onAddTask = { title ->
                         if (title.isNotBlank()) {
                             tasks.add(TaskItem(title.trim()))
@@ -211,7 +206,7 @@ fun CalmTaskApp(
                         saveAll()
                         say("Done. That's one less thing to carry.")
                     },
-                    onLater = { index ->
+                    onLater = {
                         saveAll()
                         say("Okay. I'll keep it for later.")
                     },
@@ -294,9 +289,7 @@ fun CalmTaskApp(
 }
 
 val WarmBackground = Color(0xFFF8F5EF)
-val PrimaryBlue = Color(0xFF4F7DF3)
 val CalmGreen = Color(0xFF5CB85C)
-val WarmAmber = Color(0xFFF5A623)
 val Charcoal = Color(0xFF222222)
 val MutedGray = Color(0xFF777777)
 val CardWhite = Color(0xFFFFFFFF)
@@ -407,10 +400,8 @@ fun OnboardingScreen(
 @Composable
 fun HomeScreen(
     name: String,
-    language: String,
     mood: String,
     tasks: MutableList<TaskItem>,
-    voiceEnabled: Boolean,
     onAddTask: (String) -> Unit,
     onDone: (Int) -> Unit,
     onLater: (Int) -> Unit,
@@ -634,4 +625,23 @@ fun NightScreen(
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Keep unfinished tasks for tomorrow")
-   
+        }
+
+        OutlinedButton(
+            onClick = onDeleteSkipped,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Delete skipped tasks ($skipped)")
+        }
+
+        TextButton(onClick = onBack) {
+            Text("Back")
+        }
+    }
+}
+
+@Composable
+fun SettingsScreen(
+    name: String,
+    country: String,
+  
